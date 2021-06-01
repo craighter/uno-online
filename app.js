@@ -210,7 +210,6 @@ const game = new Vue({
     skipTurn: function() {
       if (this.canSkip) {
         nextTurn();
-        this.canSkip = false;
       }
     }
   },
@@ -290,6 +289,8 @@ function updateGameOnServer() {
 }
 
 function nextTurn(n = 1, addedCards) {
+
+  game.canSkip = false;
 
   if (!addedCards) {
     for (let i = 0; i < game.gameData.cardStack; i++) {
