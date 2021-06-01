@@ -1,0 +1,148 @@
+:root {
+  --base-0: #222525;
+  --base-1: #282c2c;
+  --base-2: #363b3b;
+}
+
+@font-face {
+  font-family: lineto-circular;
+  src: url(lineto-circular-black.ttf);
+}
+
+* {
+  box-sizing: border-box;
+  font-family: lineto-circular;
+  color: white;
+  font-size: 32px;
+}
+
+button {
+  background-color: var(--base-2);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-size: 32px;
+  cursor: pointer;
+}
+
+button.red {
+  border: 4px solid red;
+}
+button.blue {
+  border: 4px solid blue;
+}
+button.green {
+  border: 4px solid lime;
+}
+button.yellow {
+  border: 4px solid yellow;
+}
+
+html, body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--base-2);
+  position: fixed;
+}
+
+.screen {
+  width: 80%;
+  margin: 0 auto;
+  padding: 100px 20px;
+  background-color: var(--base-1);
+  height: 100vh;
+}
+
+.screen.game {
+  padding-top: 0;
+}
+
+header {
+  text-align: center;
+  font-size: 100px;
+}
+
+.main, .lobby {
+  text-align: center;
+}
+
+.lobby .players {
+  padding: 20px;
+  background-color: var(--base-2);
+  border-radius: 5px;
+}
+
+.lobby button {
+  margin-top: 20px;
+}
+
+.lobby .players p {
+  margin: 5px;
+}
+
+.cards img {
+  width: 75px;
+}
+
+.cards {
+  position: absolute;
+}
+
+.player-cards {
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+}
+
+.player-cards button {
+  margin-left: 30px;
+}
+
+.other-players {
+  text-align: center;
+}
+
+.other-players > div {
+  text-align: center;
+  width: max-content;
+  display: inline-block;
+  margin: 0 20px;
+}
+
+.other-players > div > img {
+  margin-right: -25px;
+}
+
+.other-players > div > p {
+  margin-top: 5px;
+}
+
+.board {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.board img {
+  margin: 5px auto;
+  width: 75px;
+}
+
+.board div {
+  display: grid;
+  grid-template-areas: 
+      "card  deck"
+      "color text";
+}
+
+.color-picker {
+  position: absolute;
+  z-index: 1;
+  bottom: 200px;
+  left: 50%;
+  transform: translate(-50%);
+}
