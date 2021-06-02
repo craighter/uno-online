@@ -7,6 +7,5 @@ A simple online version of the Uno board game. Unlimited players. Available at h
 - Detect player leave
 - Implement UNO declaration before last card
 - Fix turn skipping
-- Store username in localStorage
 - Make turn order clear
 - Force unique username
