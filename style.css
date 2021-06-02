@@ -157,6 +157,7 @@ header {
   width: max-content;
   display: inline-block;
   margin: 0 20px;
+  white-space: nowrap;
 }
 
 .other-players > div > img {
