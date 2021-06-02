@@ -54,7 +54,7 @@
           <button class="yellow">Yellow</button>
         </div>
 
-        <div class="player-cards cards" :class="{ green: gameData.currentPlayer === playerId }">
+        <div class="player-cards cards" :class="{ active: gameData.currentPlayer === playerId }">
           <img v-for="(card, index) in gameData.players[playerId].cards" :data-index="index" @click="playCard(index)" :src="`cards/${card.name}.png`">
           <button class="yellow" v-show="canSkip" @click="skipTurn">Skip</button>
         </div>
