@@ -55,6 +55,10 @@ html, body {
   height: 100vh;
 }
 
+.screen.lobby {
+  overflow-y: scroll;
+}
+
 .screen.game {
   padding-top: 0;
 }
