@@ -52,7 +52,8 @@ const game = new Vue({
     host: false,
     playerId: 0,
     isPickingColor: false,
-    canSkip: false
+    canSkip: false,
+    unoDeclared: false
   },
   methods: {
     createGame: function() {
@@ -65,7 +66,8 @@ const game = new Vue({
       this.gameData.players = [
         {
           name: localName && localName.trim() ? localName : 'Guest 1',
-          cards: stackReference.slice(0,7)
+          cards: stackReference.slice(0,3),
+          id: 0
         }
       ];
       
@@ -107,6 +109,13 @@ const game = new Vue({
         alert('Invalid name.');
         return;
       }
+      
+      for (const player of this.gameData.players) {
+        if (player.name === newName) {
+          alert('Name already in use.');
+          return;
+        }
+      }
 
       this.gameData.players[this.playerId].name = newName;
       localStorage.setItem("uno-online-name", newName);
@@ -116,11 +125,14 @@ const game = new Vue({
       const card = this.gameData.players[this.playerId].cards[index];
       const removeCard = () => {
         this.gameData.players[this.playerId].cards.splice(index, 1);
+        if (this.gameData.players[this.playerId].cards.length === 1 && !this.unoDeclared) {
+          this.gameData.players[this.playerId].cards.push(randomCard(), randomCard(), randomCard(), randomCard());
+          alert('You forgot to declare UNO!');
+        }
+        this.unoDeclared = false;
         checkEndOfGame();
       }
       const currentCard = this.gameData.currentCard;
-
-      console.log(currentCard.name, card.name);
       
       if (card.number !== -1 && currentCard.color === card.color && currentCard.number === card.number && currentCard.name === card.name && this.gameData.currentPlayer !== this.playerId) {
         this.gameData.currentCard = card;
@@ -217,16 +229,21 @@ const game = new Vue({
       this.gameData.players[this.playerId].cards.push(randomCard());
       updateSelfOnServer();
       this.canSkip = true;
+      this.unoDeclared = false;
     },
     skipTurn: function() {
       if (this.canSkip) {
         nextTurn();
       }
+    },
+    declareUno: function() {
+      this.unoDeclared = true;
     }
   },
   computed: {
     otherPlayers: function() {
-      return this.gameData.players.filter((el, i) => i !== this.playerId);
+      return [...this.gameData.players.slice(this.playerId + 1), ...this.gameData.players.slice(0, this.playerId)];
+      // return this.gameData.players.filter((el, i) => i !== this.playerId);
     }
   }
 });
@@ -262,12 +279,25 @@ window.addEventListener('load', () => {
           }
           
           const localName = localStorage.getItem("uno-online-name");
-
+          let name = `Guest ${playerIndex + 1}`;
+          if (localName && localName.trim()) {
+            let nameAvailable = true;
+            for (const player of game.gameData.players) {
+              if (player.name === localName) {
+                nameAvailable = false;
+                break;
+              }
+            }
+            if (nameAvailable) {
+              name = localName;
+            }
+          }
           game.state = 'lobby';
           game.playerId = playerIndex;
           const playerObj = {
-            name: localName && localName.trim() ? localName : `Guest ${playerIndex + 1}`,
-            cards: stackReference.slice(0,7)
+            name: name,
+            cards: stackReference.slice(0,3),
+            id: playerIndex
           }
 
           game.gameData.players.push(playerObj);
@@ -321,8 +351,6 @@ function nextTurn(n = 1, addedCards) {
   } else {
     game.gameData.currentPlayer = (game.playerId + n) % nPlayers;
   }
-
-  console.log(game.gameData.currentPlayer);
 
   updateGameOnServer();
 }

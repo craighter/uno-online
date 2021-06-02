@@ -26,6 +26,10 @@ button {
   cursor: pointer;
 }
 
+button:focus {
+  outline: none;
+}
+
 button.red {
   border: 4px solid red;
 }
@@ -68,7 +72,20 @@ header {
   font-size: 70px;
 }
 
-.main, .lobby {
+.screen.main p {
+  position: absolute;
+  left: calc(100vw * 0.1 + 10px);
+  bottom: 5px;
+  margin: 0;
+}
+
+.screen.main main {
+  position: absolute;
+  left: 50%; top: 50%;
+  transform: translate(-50%, -50%) translateY(-100px);
+}
+
+.screen.main, .screen.lobby {
   text-align: center;
 }
 
@@ -86,19 +103,27 @@ header {
   margin: 5px;
 }
 
-.cards img {
-  width: 75px;
-  height: calc(75px * 1.5);
+.cards {
+  position: absolute;
+}
+
+.cards img, .other-player-cards img {
   transition: width 0.3s ease, height 0.3s ease;
 }
 
-.cards {
-  position: absolute;
+.cards img {
+  width: 75px;
+  height: calc(75px * 1.5);
 }
 
 .player-cards.active img {
   width: 125px;
   height: calc(125px * 1.5);
+}
+
+.other-player-cards.active img {
+  width: 100px;
+  height: calc(100px * 1.5);
 }
 
 .player-cards {
@@ -114,6 +139,17 @@ header {
 
 .other-players {
   text-align: center;
+}
+
+.other-players .turn-order {
+  --current-color: red;
+  transition: transform 0.3s ease;
+  color: white;
+  text-align: center;
+  width: 100%;
+  font-size: 60px;
+  -webkit-text-stroke-width: 3px;
+  -webkit-text-stroke-color: var(--current-color);
 }
 
 .other-players > div {
@@ -136,6 +172,11 @@ header {
   top: 50%; left: 50%;
   transform: translate(-50%, -50%);
   text-align: center;
+  display: flex;
+  place-items: center;
+  background-color: var(--base-2);
+  padding: 20px;
+  border-radius: 15px;
 }
 
 .board img {
@@ -149,6 +190,25 @@ header {
       "card  deck"
       "color text";
 }
+
+.board button {
+  height: 50%;
+  margin: 10px;
+}
+
+.board button.active {
+  background-color: lime;
+}
+
+.board button:disabled {
+  border-color: darkgreen;
+  color: grey;
+}
+
+.board button.active:disabled {
+  background-color: darkgreen;
+}
+
 
 .color-picker {
   position: absolute;

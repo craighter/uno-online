@@ -14,8 +14,12 @@
 
       <div v-if="state === 'main'" class="screen main">
 
-        <header>Uno Online</header>
-        <button @click="createGame" class="red">Create Game</button>
+        <main>
+          <header>Uno Online</header>
+          <button @click="createGame" class="red">Create Game</button>
+        </main>
+        
+        <p>By Oskar Zanota</p>
 
       </div>
 
@@ -44,7 +48,7 @@
             <span :style="`visibility: ${gameData.currentCard.name === '+4' || gameData.currentCard.name === '+col' ? 'visible' : 'hidden'};`">{{gameData.currentCard.color}}</span>
             <span>+{{gameData.cardStack}}</span>
           </div>
-          <p>Current player: {{gameData.players[gameData.currentPlayer].name}}</p>
+          <button class="green" :class="{ active: unoDeclared }" :disabled="gameData.players[playerId].cards.length !== 2 || gameData.currentPlayer !== playerId" @click="declareUno">UNO!</button>
         </div>
 
         <div class="color-picker" v-show="isPickingColor">
@@ -61,10 +65,12 @@
 
         <div class="other-players">
 
-          <div v-for="otherPlayer in otherPlayers">
+          <div v-for="otherPlayer in otherPlayers" class="other-player-cards" :class="{ active: gameData.currentPlayer === otherPlayer.id }">
             <img v-for="card in otherPlayer.cards" src="cards/back.png">
-            <p>{{otherPlayer.name}} ({{otherPlayer.cards.length}})</span>
+            <p>{{otherPlayer.name}} ({{otherPlayer.cards.length}})</p>
           </div>
+
+          <div class="turn-order" :style="`transform: rotateZ(${gameData.turnOrder === 1 ? 0 : 180}deg); --current-color: ${gameData.currentCard.color.replace('green', 'lime')}`">➜</div>
 
         </div>
 
