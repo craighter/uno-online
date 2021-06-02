@@ -6,3 +6,4 @@ A simple online version of the Uno board game. Unlimited players. Available at h
 - Detect host quit
 - Detect player leave
 - Implement UNO declaration before last card
+- Fix turn skipping
