@@ -118,7 +118,20 @@ const game = new Vue({
       const currentCard = this.gameData.currentCard;
 
       console.log(currentCard.name, card.name);
-
+      
+      if (card.number !== -1 && currentCard.color === card.color && currentCard.number === card.number && currentCard.name === card.name && this.gameData.currentPlayer !== this.playerId) {
+        this.gameData.currentCard = card;
+        removeCard();
+        this.gameData.currentPlayer = this.playerId + this.turnOrder;
+        const nPlayers = this.gameData.players.length;
+        const dist = this.playerId + this.turnOrder;
+        if (dist < 0) {
+          this.gameData.currentPlayer = nPlayers + dist;
+        } else {
+          this.gameData.currentPlayer = (this.playerId + this.turnOrder) % nPlayers;
+        }
+        return;
+      }
       // If it's not our turn return
       if (this.gameData.currentPlayer !== this.playerId) return;
 
