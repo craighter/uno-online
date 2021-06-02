@@ -66,12 +66,6 @@ const game = new Vue({
           cards: stackReference.slice(0,7)
         }
       ];
-
-      this.gameData.players[0].cards.push({
-        name: `redTurn`,
-        number: -1,
-        color: 'red'
-      });
       
       this.gameData.cardStack = 0;
       this.gameData.turn = 0;
