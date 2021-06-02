@@ -84,10 +84,15 @@ header {
 
 .cards img {
   width: 75px;
+  transition: width 0.3s ease;
 }
 
 .cards {
   position: absolute;
+}
+
+.player-cards.active img {
+  width: 125px;
 }
 
 .player-cards {
