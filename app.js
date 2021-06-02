@@ -238,15 +238,15 @@ window.addEventListener('load', () => {
           game.gameData = snap.val();
           const playerIndex = game.gameData.players.length;
           
-          if (playerIndex > 5) {
+          /*if (playerIndex > 5) {
             alert('Game is full.');
             window.location.href = '127.0.0.1:5500';
             return;
-          }
+          }*/
 
           if (game.gameData.started) {
             alert('Game has already started.');
-            window.location.href = '127.0.0.1:5500';
+            window.location.href = 'https://oskar-codes.github.io/uno-online';
             return;
           }
 
@@ -275,7 +275,7 @@ function handleGameUpdate(snap) {
   }
   if (incomingGameData.winner) {
     alert(`${incomingGameData.winner} won the game!`);
-    window.location.href = '127.0.0.1:5500';
+    window.location.href = 'https://oskar-codes.github.io/uno-online';
   }
   game.gameData = incomingGameData;
 }
