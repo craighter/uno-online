@@ -58,22 +58,29 @@
           <button class="yellow">Yellow</button>
         </div>
 
-        <div class="player-cards cards" :class="{ active: gameData.currentPlayer === playerId }">
+        <div class="player-cards" :style="`justify-content: ${playerCardsJustification};`" :class="{ active: gameData.currentPlayer === playerId }">
           <img v-for="(card, index) in gameData.players[playerId].cards" :data-index="index" @click="playCard(index)" :src="`cards/${card.name}.png`">
           <button class="yellow" v-show="canSkip" @click="skipTurn">Skip</button>
         </div>
 
-        <div class="other-players">
 
-          <div v-for="otherPlayer in otherPlayers" class="other-player-cards" :class="{ active: gameData.currentPlayer === otherPlayer.id }">
-            <img v-for="card in otherPlayer.cards" src="cards/back.png">
-            <p>{{otherPlayer.name}} ({{otherPlayer.cards.length}})</p>
+        <div class="top-bar">
+          
+          <div class="other-players">
+  
+            <div v-for="otherPlayer in otherPlayers" class="other-player-cards" :class="{ active: gameData.currentPlayer === otherPlayer.id }">
+              <img v-for="card in otherPlayer.cards" src="cards/back.png">
+              <p>{{otherPlayer.name}} ({{otherPlayer.cards.length}})</p>
+            </div>
+  
+            
           </div>
 
           <div class="turn-order" :style="`transform: rotateZ(${gameData.turnOrder === 1 ? 0 : 180}deg); --current-color: ${gameData.currentCard.color.replace('green', 'lime')}`">➜</div>
 
         </div>
 
+        
 
       </div>
 

@@ -14,6 +14,11 @@
   font-family: lineto-circular;
   color: white;
   font-size: 32px;
+  user-select: none;
+}
+
+::-webkit-scrollbar {
+  display: none;
 }
 
 button {
@@ -65,6 +70,7 @@ html, body {
 
 .screen.game {
   padding-top: 0;
+  width: 100%;
 }
 
 header {
@@ -103,15 +109,16 @@ header {
   margin: 5px;
 }
 
-.cards {
-  position: absolute;
-}
-
-.cards img, .other-player-cards img {
+.player-cards img, .other-player-cards img {
   transition: width 0.3s ease, height 0.3s ease;
 }
 
-.cards img {
+.other-player-cards img {
+  width: 50px;
+  height: calc(50px * 1.5);
+}
+
+.player-cards img {
   width: 75px;
   height: calc(75px * 1.5);
 }
@@ -121,9 +128,36 @@ header {
   height: calc(125px * 1.5);
 }
 
+.player-cards.active img:hover {
+  width: 150px;
+  height: calc(150px * 1.5);
+}
+
 .other-player-cards.active img {
-  width: 100px;
-  height: calc(100px * 1.5);
+  width: 75px;
+  height: calc(75px * 1.5);
+}
+
+@keyframes rainbow {
+  0% {
+    color: red;
+  }
+  25% {
+    color: yellow;
+  }
+  50% {
+    color: lime;
+  }
+  75% {
+    color: blue;
+  }
+  100% {
+    color: red;
+  }
+}
+
+.other-player-cards.active p {
+  animation: rainbow 4s infinite;
 }
 
 .player-cards {
@@ -131,18 +165,39 @@ header {
   left: 50%;
   transform: translateX(-50%);
   display: flex;
+  width: 100%;
+  height: 33vh;
+  justify-content: space-between;
+  align-items: flex-end;
+  overflow-x: scroll;
+  position: absolute;
+  background-color: var(--base-2);
+  padding: 20px;
 }
 
 .player-cards button {
   margin-left: 30px;
 }
 
-.other-players {
+.top-bar {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  height: 33vh;
   text-align: center;
-  white-space: nowrap;
+  background-color: var(--base-2);
 }
 
-.other-players .turn-order {
+.other-players {
+  overflow-x: scroll;
+  width: 100%;
+  white-space: nowrap;
+  padding: 20px;
+  padding-bottom: 0;
+}
+
+.turn-order {
   --current-color: red;
   transition: transform 0.3s ease;
   color: white;
@@ -151,17 +206,23 @@ header {
   font-size: 60px;
   -webkit-text-stroke-width: 3px;
   -webkit-text-stroke-color: var(--current-color);
+  margin: 0;
 }
 
-.other-players > div {
+.other-players .other-player-cards {
   text-align: center;
   width: max-content;
   display: inline-block;
   margin: 0 20px;
+  white-space: nowrap;
 }
 
-.other-players > div > img {
+.other-players .other-player-cards img {
   margin-right: -40px;
+}
+
+.other-players .other-player-cards img:nth-last-child(2) {
+  margin-right: 0;
 }
 
 .other-players > div > p {
@@ -178,6 +239,7 @@ header {
   background-color: var(--base-2);
   padding: 20px;
   border-radius: 15px;
+  gap: 20px;
 }
 
 .board img {
@@ -190,6 +252,7 @@ header {
   grid-template-areas: 
       "card  deck"
       "color text";
+  gap: 20px;
 }
 
 .board button {

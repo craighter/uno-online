@@ -244,6 +244,12 @@ const game = new Vue({
     otherPlayers: function() {
       return [...this.gameData.players.slice(this.playerId + 1), ...this.gameData.players.slice(0, this.playerId)];
       // return this.gameData.players.filter((el, i) => i !== this.playerId);
+    },
+    playerCardsJustification: function() {
+      const width = window.innerWidth;
+      const nCards = this.gameData.players[this.playerId].cards.length;
+      if (nCards * 125 >= width) return 'space-between';
+      return 'center';
     }
   }
 });
