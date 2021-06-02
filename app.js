@@ -130,6 +130,7 @@ const game = new Vue({
         } else {
           this.gameData.currentPlayer = (this.playerId + this.turnOrder) % nPlayers;
         }
+        updateGameOnServer();
         return;
       }
       // If it's not our turn return
