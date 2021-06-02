@@ -59,10 +59,12 @@ const game = new Vue({
 
       const ref = firebase.database().ref('games').push();
       const key = ref.key;
+      
+      const localName = localStorage.getItem("uno-online-name");
 
       this.gameData.players = [
         {
-          name: 'Guest 1',
+          name: localName && localName.trim() ? localName : 'Guest 1',
           cards: stackReference.slice(0,7)
         }
       ];
@@ -107,6 +109,7 @@ const game = new Vue({
       }
 
       this.gameData.players[this.playerId].name = newName;
+      localStorage.setItem("uno-online-name", newName);
       updateSelfOnServer();
     },
     playCard: async function(index) {
@@ -257,11 +260,13 @@ window.addEventListener('load', () => {
             window.location.href = 'https://oskar-codes.github.io/uno-online';
             return;
           }
+          
+          const localName = localStorage.getItem("uno-online-name");
 
           game.state = 'lobby';
           game.playerId = playerIndex;
           const playerObj = {
-            name: `Guest ${playerIndex + 1}`,
+            name: localName && localName.trim() ? localName : `Guest ${playerIndex + 1}`,
             cards: stackReference.slice(0,7)
           }
 
