@@ -279,5 +279,6 @@ header {
   z-index: 1;
   bottom: 200px;
   left: 50%;
+  white-space: nowrap;
   transform: translate(-50%);
 }
