@@ -9,3 +9,4 @@ A simple online version of the Uno board game. Unlimited players. Available at h
 - Fix turn skipping
 - Store username in localStorage
 - Make turn order clear
+- Force unique username
