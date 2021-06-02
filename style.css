@@ -84,6 +84,7 @@ header {
 
 .cards img {
   width: 75px;
+  height: calc(75px * 1.5);
   transition: width 0.3s ease;
 }
 
@@ -93,6 +94,7 @@ header {
 
 .player-cards.active img {
   width: 125px;
+  height: calc(125px * 1.5);
 }
 
 .player-cards {
