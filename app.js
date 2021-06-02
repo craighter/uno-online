@@ -66,7 +66,7 @@ const game = new Vue({
       this.gameData.players = [
         {
           name: localName && localName.trim() ? localName : 'Guest 1',
-          cards: stackReference.slice(0,3),
+          cards: stackReference.slice(0,7),
           id: 0
         }
       ];
@@ -296,7 +296,7 @@ window.addEventListener('load', () => {
           game.playerId = playerIndex;
           const playerObj = {
             name: name,
-            cards: stackReference.slice(0,3),
+            cards: stackReference.slice(0,7),
             id: playerIndex
           }
 
