@@ -85,7 +85,7 @@ header {
 .cards img {
   width: 75px;
   height: calc(75px * 1.5);
-  transition: width 0.3s ease;
+  transition: width 0.3s ease, height 0.3s ease;
 }
 
 .cards {
