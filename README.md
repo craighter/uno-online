@@ -7,3 +7,4 @@ A simple online version of the Uno board game. Unlimited players. Available at h
 - Fix turn skipping
 - HTML popups
 - Higher resolution cards
+- Game settings available to host
