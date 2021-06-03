@@ -19,7 +19,7 @@
           <button @click="createGame" class="red">Create Game</button>
         </main>
         
-        <p>By Oskar Zanota</p>
+        <p class="credits">By Oskar Zanota</p>
 
       </div>
 
@@ -36,6 +36,8 @@
         <button @click="changeName" class="blue">Change name</button>
 
         <button @click="startGame" class="green" v-if="host && gameData.players.length > 1">Start Game</button>
+
+        <p class="credits">By Oskar Zanota</p>
 
       </div>
 

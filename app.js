@@ -29,7 +29,7 @@ for (const color of colors) {
     {
       name: `${color}Pass`,
       number: -1,
-      color: color 
+      color: color
     },
     {
       name: `${color}Turn`,
@@ -40,8 +40,10 @@ for (const color of colors) {
 }
 shuffle(stackReference);
 function randomCard() {
-  return stackReference[Math.floor(Math.random() * stackReference.length)];
+  const card = stackReference[Math.floor(Math.random() * stackReference.length)];
+  return card;
 }
+const nCards = 7;
 
 const game = new Vue({
   el: '#app',
@@ -63,10 +65,19 @@ const game = new Vue({
       
       const localName = localStorage.getItem("uno-online-name");
 
+      const num = Math.floor(Math.random() * 9);
+      const col = colors[Math.floor(Math.random() * 4)];
+      
+      this.gameData.currentCard = {
+        name: `${col}${num}`,
+        number: num,
+        color: col
+      }
+
       this.gameData.players = [
         {
           name: localName && localName.trim() ? localName : 'Guest 1',
-          cards: stackReference.slice(0,7),
+          cards: stackReference.slice(0, nCards),
           id: 0
         }
       ];
@@ -74,15 +85,8 @@ const game = new Vue({
       this.gameData.cardStack = 0;
       this.gameData.turn = 0;
       this.gameData.started = false;
-      this.gameData.winner = '';
+      this.gameData.winners = [];
       this.host = true;
-      const num = Math.floor(Math.random() * 9);
-      const col = colors[Math.floor(Math.random() * 4)];
-      this.gameData.currentCard = {
-        name: `${col}${num}`,
-        number: num,
-        color: col
-      }
       this.gameData.currentPlayer = 0;
       this.gameData.turnOrder = 1;
 
@@ -98,13 +102,13 @@ const game = new Vue({
     startGame: function() {
       if (this.host && this.gameData.players.length > 1) {
         this.gameData.started = true;
-        firebase.database().ref(`games/${this.gameId}/started`).set(true).then(() => {
+        gameServerRef('started').set(true).then(() => {
           this.state = 'game';
         });
       }
     },
     changeName: function() {
-      const newName = prompt('Enter a new name.', this.gameData.players[this.playerId].name);
+      const newName = prompt('Enter a new name.', this.client.name);
       if (!newName.trim() || newName.length > 15) {
         alert('Invalid name.');
         return;
@@ -117,37 +121,22 @@ const game = new Vue({
         }
       }
 
-      this.gameData.players[this.playerId].name = newName;
+      this.client.name = newName;
       localStorage.setItem("uno-online-name", newName);
       updateSelfOnServer();
     },
     playCard: async function(index) {
-      const card = this.gameData.players[this.playerId].cards[index];
+      const card = this.client.cards[index];
       const removeCard = () => {
-        this.gameData.players[this.playerId].cards.splice(index, 1);
-        if (this.gameData.players[this.playerId].cards.length === 1 && !this.unoDeclared) {
-          this.gameData.players[this.playerId].cards.push(randomCard(), randomCard(), randomCard(), randomCard());
+        this.client.cards.splice(index, 1);
+        if (this.client.cards.length === 1 && !this.unoDeclared) {
+          this.client.cards.push(randomCard(), randomCard(), randomCard(), randomCard());
           alert('You forgot to declare UNO!');
         }
         this.unoDeclared = false;
-        checkEndOfGame();
       }
       const currentCard = this.gameData.currentCard;
-      
-      if (card.number !== -1 && currentCard.color === card.color && currentCard.number === card.number && currentCard.name === card.name && this.gameData.currentPlayer !== this.playerId) {
-        this.gameData.currentCard = card;
-        removeCard();
-        this.gameData.currentPlayer = this.playerId + this.turnOrder;
-        const nPlayers = this.gameData.players.length;
-        const dist = this.playerId + this.turnOrder;
-        if (dist < 0) {
-          this.gameData.currentPlayer = nPlayers + dist;
-        } else {
-          this.gameData.currentPlayer = (this.playerId + this.turnOrder) % nPlayers;
-        }
-        updateGameOnServer();
-        return;
-      }
+
       // If it's not our turn return
       if (this.gameData.currentPlayer !== this.playerId) return;
 
@@ -226,7 +215,7 @@ const game = new Vue({
     pickRandomCard: function() {
       if (this.gameData.currentPlayer !== this.playerId) return;
       if (this.canSkip) return;
-      this.gameData.players[this.playerId].cards.push(randomCard());
+      this.client.cards.push(randomCard());
       updateSelfOnServer();
       this.canSkip = true;
       this.unoDeclared = false;
@@ -238,18 +227,29 @@ const game = new Vue({
     },
     declareUno: function() {
       this.unoDeclared = true;
+    },
+    log: function(...args) {
+      console.log(...args);
+      return false;
     }
   },
   computed: {
     otherPlayers: function() {
       return [...this.gameData.players.slice(this.playerId + 1), ...this.gameData.players.slice(0, this.playerId)];
-      // return this.gameData.players.filter((el, i) => i !== this.playerId);
     },
     playerCardsJustification: function() {
       const width = window.innerWidth;
-      const nCards = this.gameData.players[this.playerId].cards.length;
+      const nCards = this.client.cards.length;
       if (nCards * 125 >= width) return 'space-between';
       return 'center';
+    },
+    client: function() {
+      return this.gameData.players[this.playerId];
+    }
+  },
+  watch: {
+    state: function(val) {
+      if (val === 'game') resetOwnCards();
     }
   }
 });
@@ -263,78 +263,110 @@ window.addEventListener('load', () => {
       for (const game in games) {
         if (game === params.game) {
           gameExists = true;
+          break;
         }
       }
       
-      if (gameExists) {
-        game.gameId = params.game;
-        firebase.database().ref(`games/${params.game}`).once('value', (snap) => {
-          game.gameData = snap.val();
-          const playerIndex = game.gameData.players.length;
-          
-          /*if (playerIndex > 5) {
-            alert('Game is full.');
-            window.location.href = '127.0.0.1:5500';
-            return;
-          }*/
-
-          if (game.gameData.started) {
-            alert('Game has already started.');
-            window.location.href = 'https://oskar-codes.github.io/uno-online';
-            return;
-          }
-          
-          const localName = localStorage.getItem("uno-online-name");
-          let name = `Guest ${playerIndex + 1}`;
-          if (localName && localName.trim()) {
-            let nameAvailable = true;
-            for (const player of game.gameData.players) {
-              if (player.name === localName) {
-                nameAvailable = false;
-                break;
-              }
-            }
-            if (nameAvailable) {
-              name = localName;
-            }
-          }
-          game.state = 'lobby';
-          game.playerId = playerIndex;
-          const playerObj = {
-            name: name,
-            cards: stackReference.slice(0,7),
-            id: playerIndex
-          }
-
-          game.gameData.players.push(playerObj);
-
-          updateSelfOnServer().then(() => {
-            firebase.database().ref(`games/${params.game}`).on('value', handleGameUpdate);
-          });
-        });
+      if (!gameExists) {
+        alert('Game not found.');
+        window.location.href = 'https://oskar-codes.github.io/uno-online';
+        return;
       }
+
+      game.gameId = params.game;
+      gameServerRef().once('value', (snap) => {
+
+        const incomingGameData = snap.val();
+
+        for (const player of incomingGameData.players) {
+          if (!player.cards) {
+            player.cards = [];
+          }
+        }
+        if (!incomingGameData.winners) incomingGameData.winners = [];
+
+        game.gameData = incomingGameData;
+        const playerIndex = game.gameData.players.length;
+
+        if (game.gameData.started) {
+          alert('Game has already started.');
+          window.location.href = 'https://oskar-codes.github.io/uno-online';
+          return;
+        }
+        
+        const localName = localStorage.getItem("uno-online-name");
+        let name = `Guest ${playerIndex + 1}`;
+        if (localName && localName.trim()) {
+          let nameAvailable = true;
+          for (const player of game.gameData.players) {
+            if (player.name === localName) {
+              nameAvailable = false;
+              break;
+            }
+          }
+          if (nameAvailable) name = localName;
+        }
+        game.state = 'lobby';
+        game.playerId = playerIndex;
+        const playerObj = {
+          name: name,
+          cards: stackReference.slice(0, nCards),
+          id: playerIndex
+        }
+
+        game.gameData.players.push(playerObj);
+
+        updateSelfOnServer().then(() => {
+          gameServerRef().on('value', handleGameUpdate);
+        });
+      });
     });
   }
 });
 
+function gameServerRef(query) {
+  if (query)
+    return firebase.database().ref(`games/${game.gameId}/${query}`);
+  return firebase.database().ref(`games/${game.gameId}`);
+}
+
+function resetOwnCards() {
+  shuffle(stackReference);
+  game.client.cards = stackReference.slice(0, nCards);
+  updateSelfOnServer();
+}
+
 function handleGameUpdate(snap) {
+  let overwriteSelf = true;
   const incomingGameData = snap.val();
-  if (incomingGameData.started && !game.gameData.started) {
+
+  for (const player of incomingGameData.players) {
+    if (!player.cards) {
+      player.cards = [];
+    }
+  }
+
+  if (!incomingGameData.winners) incomingGameData.winners = [];
+
+  if (incomingGameData.started && game.state !== 'game') {
     game.state = 'game';
   }
-  if (incomingGameData.winner) {
-    alert(`${incomingGameData.winner} won the game!`);
-    window.location.href = 'https://oskar-codes.github.io/uno-online';
+  
+  if (incomingGameData.winners.length > game.gameData.winners.length) {
+    alert(`${incomingGameData.winners[incomingGameData.winners.length - 1]} won the game!`);
+    game.state = 'lobby';
+
   }
+  
   game.gameData = incomingGameData;
 }
 
 function updateSelfOnServer() {
-  return firebase.database().ref(`games/${game.gameId}/players/${game.playerId}`).set(game.gameData.players[game.playerId]);
+  return gameServerRef(`players/${game.playerId}`).set(game.client);
 }
 
 function updateGameOnServer() {
-  return firebase.database().ref(`games/${game.gameId}`).set(game.gameData);
+  return gameServerRef().set(game.gameData);
 }
 
 function nextTurn(n = 1, addedCards) {
@@ -343,7 +375,7 @@ function nextTurn(n = 1, addedCards) {
 
   if (!addedCards) {
     for (let i = 0; i < game.gameData.cardStack; i++) {
-      game.gameData.players[game.playerId].cards.push(randomCard());
+      game.client.cards.push(randomCard());
     }
     game.gameData.cardStack = 0;
   }
@@ -358,12 +390,35 @@ function nextTurn(n = 1, addedCards) {
     game.gameData.currentPlayer = (game.playerId + n) % nPlayers;
   }
 
-  updateGameOnServer();
+  updateGameOnServer().then(() => {
+    checkEndOfGame();
+  })
 }
 
 function checkEndOfGame() {
-  if (game.gameData.players[game.playerId].cards.length === 0 && game.gameData.cardStack === 0) {
-    firebase.database().ref(`games/${game.gameId}/winner`).set(game.gameData.players[game.playerId].name);
+  if (game.client.cards.length === 0 && game.gameData.cardStack === 0) {
+    
+    // Win and reset game
+    alert('You won!');
+    game.state = 'lobby';
+
+    game.gameData.winners.push(game.client.name);
+    game.gameData.cardStack = 0;
+    game.gameData.turn = 0;
+    game.gameData.started = false;
+    game.gameData.currentPlayer = 0;
+    game.gameData.turnOrder = 1;
+
+    const num = Math.floor(Math.random() * 9);
+    const col = colors[Math.floor(Math.random() * 4)];
+    game.gameData.currentCard = {
+      name: `${col}${num}`,
+      number: num,
+      color: col
+    }
+    
+    updateGameOnServer();
+
   }
 }
 
@@ -397,7 +452,7 @@ function getAllUrlParams(url) {
         let key = paramName.replace(/\[(\d+)?\]/, '');
         if (!obj[key]) obj[key] = [];
         if (paramName.match(/\[\d+\]$/)) {
-          var index = /\[(\d+)\]/.exec(paramName)[1];
+          const index = /\[(\d+)\]/.exec(paramName)[1];
           obj[key][index] = paramValue;
         } else {
           obj[key].push(paramValue);

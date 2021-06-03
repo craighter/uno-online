@@ -78,9 +78,9 @@ header {
   font-size: 70px;
 }
 
-.screen.main p {
-  position: absolute;
-  left: calc(100vw * 0.1 + 10px);
+.screen.main p.credits, .screen.lobby p.credits {
+  position: fixed;
+  left: calc(10vw + 10px);
   bottom: 5px;
   margin: 0;
 }
