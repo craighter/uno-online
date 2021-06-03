@@ -136,6 +136,65 @@ const game = new Vue({
         this.unoDeclared = false;
       }
       const currentCard = this.gameData.currentCard;
+      //Same card, skip turn
+      if ((currentCard.color === card.color && currentCard.number === card.number && currentCard.name === card.name && this.gameData.currentPlayer !== this.playerId) || (currentCard.name.includes('+4') && card.name.includes('+4') || (currentCard.name.includes('+col') && card.name.includes('+col')))) {
+        this.gameData.currentCard = card;
+        this.gameData.turnSkip = true;
+        if (card.number !== -1) {
+          this.gameData.currentCard = card;
+          removeCard();
+          nextTurn();
+          return;
+        }
+        if (card.name.includes('+2')) {
+          this.gameData.currentCard = card;
+          this.gameData.cardStack += 2;
+          removeCard();
+          nextTurn(1, true);
+          return;
+        }
+  
+        // Pass
+        if (card.name.includes('Pass')) {
+          this.gameData.currentCard = card;
+          removeCard();
+          nextTurn(2);
+          return;
+        }
+  
+        // Uno Reverse
+        if (card.name.includes('Turn')) {
+          this.gameData.currentCard = card;
+          this.gameData.turnOrder *= -1;
+          removeCard();
+          nextTurn(this.gameData.players.length === 2 ? 0 : 1);
+          return;
+        }
+  
+        // +4
+        if (card.name.includes('+4')) {
+          const col = await pickColor();
+          game.isPickingColor = false;
+          card.color = col;
+          this.gameData.currentCard = card;
+          this.gameData.cardStack += 4;
+          removeCard();
+          nextTurn(1, true);
+          return;
+        }
+  
+        // color change
+        if (card.name.includes('+col')) {
+          const col = await pickColor();
+          game.isPickingColor = false;
+          card.color = col;
+          this.gameData.currentCard = card;
+          removeCard();
+          nextTurn();
+          return;
+        }
+        return;
+      }
 
       // If it's not our turn return
       if (this.gameData.currentPlayer !== this.playerId) return;
@@ -143,6 +202,7 @@ const game = new Vue({
       // If we are not currently picking a color
       if (this.isPickingColor) return;
       
+      if (this.gameData.turnSkip === true) return;
       // For number cards
       if (card.number !== -1) {
         if (currentCard.color === card.color || card.number === currentCard.number) {
@@ -337,7 +397,6 @@ function resetOwnCards() {
 }
 
 function handleGameUpdate(snap) {
-  let overwriteSelf = true;
   const incomingGameData = snap.val();
 
   for (const player of incomingGameData.players) {
@@ -372,7 +431,7 @@ function updateGameOnServer() {
 function nextTurn(n = 1, addedCards) {
 
   game.canSkip = false;
-
+  game.gameData.turnSkip = false;
   if (!addedCards) {
     for (let i = 0; i < game.gameData.cardStack; i++) {
       game.client.cards.push(randomCard());

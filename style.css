@@ -133,6 +133,16 @@ header {
   height: calc(150px * 1.5);
 }
 
+.player-cards img.img-eligible-for-skip {
+  width: 100px;
+  height: calc(100px * 1.5);
+}
+
+.player-cards img.img-eligible-for-skip:hover {
+  width: 125px;
+  height: calc(125px * 1.5);
+}
+
 .other-player-cards.active img {
   width: 75px;
   height: calc(75px * 1.5);

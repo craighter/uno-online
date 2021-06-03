@@ -50,7 +50,7 @@
             <span :style="`visibility: ${gameData.currentCard.name === '+4' || gameData.currentCard.name === '+col' ? 'visible' : 'hidden'};`">{{gameData.currentCard.color}}</span>
             <span>+{{gameData.cardStack}}</span>
           </div>
-          <button class="green" :class="{ active: unoDeclared }" :disabled="gameData.players[playerId].cards.length !== 2 || gameData.currentPlayer !== playerId" @click="declareUno">UNO!</button>
+          <button class="green" :class="{ active: unoDeclared }" :disabled="gameData.players[playerId].cards.length !== 2" @click="declareUno">UNO!</button>
         </div>
 
         <div class="color-picker" v-show="isPickingColor">
@@ -61,10 +61,9 @@
         </div>
 
         <div class="player-cards" :style="`justify-content: ${playerCardsJustification};`" :class="{ active: gameData.currentPlayer === playerId }">
-          <img v-for="(card, index) in gameData.players[playerId].cards" :data-index="index" @click="playCard(index)" :src="`cards/${card.name}.png`">
+          <img :class="{ 'img-eligible-for-skip': (gameData.currentCard.color === card.color && gameData.currentCard.number === card.number && gameData.currentCard.name === card.name && gameData.currentPlayer !== playerId ) || ((gameData.currentCard.name.includes('+4') && card.name.includes('+4')) || (gameData.currentCard.name.includes('+col') && card.name.includes('+col')))  }" v-for="(card, index) in gameData.players[playerId].cards" :data-index="index" @click="playCard(index)" :src="`cards/${card.name}.png`">
           <button class="yellow" v-show="canSkip" @click="skipTurn">Skip</button>
         </div>
-
 
         <div class="top-bar">
           
