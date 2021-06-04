@@ -437,6 +437,13 @@ function handleGameUpdate(snap) {
   }
   
   game.gameData = incomingGameData;
+
+  window.setTimeout(() => {
+    const el = Array.from(document.querySelectorAll('.other-player-cards')).find(e => e.classList.contains('active'));
+    if (el) {
+      el.scrollIntoView({behavior: "smooth", block: 'center'});
+    }
+  });
 }
 
 function updateSelfOnServer() {

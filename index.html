@@ -30,7 +30,7 @@
 
         <div class="players">
           <h1>Players:</h1>
-          <p v-for="(player, index) in gameData.players">{{player.name}} <button @click="kick(index)" v-if="host && player.id !== 0" class="red">✕</button></p>
+          <p v-for="(player, index) in gameData.players" :class="{ rainbow: player.id === playerId }">{{player.name}} <button @click="kick(index)" v-if="host && player.id !== 0" class="red">✕</button></p>
         </div>
 
         <button @click="changeName" class="blue">Change name</button>

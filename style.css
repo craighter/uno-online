@@ -176,7 +176,7 @@ img {
   }
 }
 
-.other-player-cards.active p {
+.other-player-cards.active p, .rainbow {
   animation: rainbow 4s infinite;
 }
 
