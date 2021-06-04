@@ -353,8 +353,9 @@ window.addEventListener('load', () => {
       if (!gameExists) {
         showPopup({
           header: 'Game not found.'
+        }).then(() => {
+          window.location.href = 'https://oskar-codes.github.io/uno-online';
         });
-        window.location.href = 'https://oskar-codes.github.io/uno-online';
         return;
       }
 
@@ -376,8 +377,9 @@ window.addEventListener('load', () => {
         if (game.gameData.started) {
           showPopup({
             header: 'Game has already started.'
+          }).then(() => {
+            window.location.href = 'https://oskar-codes.github.io/uno-online';
           });
-          window.location.href = 'https://oskar-codes.github.io/uno-online';
           return;
         }
         
@@ -438,8 +440,9 @@ function handleGameUpdate(snap) {
   if (!isInGame) {
     showPopup({
       header: `The host (${incomingGameData.players[0].name}) kicked you from the server.`
+    }).then(() => {
+      window.location.href = 'https://oskar-codes.github.io/uno-online';
     });
-    window.location.href = 'https://oskar-codes.github.io/uno-online';
   }
 
   if (!incomingGameData.winners) incomingGameData.winners = [];
@@ -451,8 +454,9 @@ function handleGameUpdate(snap) {
   if (incomingGameData.winners.length > game.gameData.winners.length) {
     showPopup({
       header: `${incomingGameData.winners[incomingGameData.winners.length - 1]} won the game!`
+    }).then(() => {
+      game.state = 'lobby';
     });
-    game.state = 'lobby';
 
   }
   
@@ -596,7 +600,10 @@ function showPopup({ header, paragraph, type, placeholder }) {
       close.classList.add('yellow');
       close.textContent = 'Close';
 
-      close.addEventListener('click', closePopup);
+      close.addEventListener('click', () => {
+        resolve(null);
+        closePopup();
+      });
 
       buttons.appendChild(close);
     }
