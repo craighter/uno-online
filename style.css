@@ -109,6 +109,10 @@ header {
   margin: 5px;
 }
 
+img {
+  -webkit-user-drag: none;
+}
+
 .player-cards img, .other-player-cards img {
   transition: width 0.3s ease, height 0.3s ease;
 }
@@ -133,7 +137,7 @@ header {
   height: calc(150px * 1.5);
 }
 
-.player-cards img.img-eligible-for-skip {
+.player-cards:not(.active) img.img-eligible-for-skip {
   width: 100px;
   height: calc(100px * 1.5);
 }
@@ -287,7 +291,7 @@ header {
 .color-picker {
   position: absolute;
   z-index: 1;
-  bottom: 200px;
+  bottom: 230px;
   left: 50%;
   white-space: nowrap;
   transform: translate(-50%);
