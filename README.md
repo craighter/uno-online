@@ -5,3 +5,4 @@ A simple online version of the Uno board game. Unlimited players. Available at h
 - Detect host quit
 - Detect player leave
 - Game settings available to host
+- Display lower res cards when on mobile data
