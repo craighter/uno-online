@@ -8,3 +8,4 @@ A simple online version of the Uno board game. Unlimited players. Available at h
 - HTML popups
 - Higher resolution cards
 - Game settings available to host
+- Allow host to kick players
