@@ -107,16 +107,26 @@ const game = new Vue({
         });
       }
     },
-    changeName: function() {
-      const newName = prompt('Enter a new name.', this.client.name);
+    changeName: async function() {
+      const newName = await showPopup({
+        header: 'Enter a new name.',
+        type: 'text',
+        placeholder: this.client.name
+      });
+      if (newName === null) return;
       if (!newName.trim() || newName.length > 15) {
-        alert('Invalid name.');
+        showPopup({
+          header: 'Invalid name.',
+          paragraph: 'Name must be less than 15 characters and non-empty.'
+        });
         return;
       }
       
       for (const player of this.gameData.players) {
         if (player.name === newName) {
-          alert('Name already in use.');
+          showPopup({
+            header: 'Name already in use.'
+          });
           return;
         }
       }
@@ -131,7 +141,9 @@ const game = new Vue({
         this.client.cards.splice(index, 1);
         if (this.client.cards.length === 1 && !this.unoDeclared) {
           this.client.cards.push(randomCard(), randomCard(), randomCard(), randomCard());
-          alert('You forgot to declare UNO!');
+          showPopup({
+            header: 'You forgot to declare UNO!'
+          });
         }
         this.unoDeclared = false;
       }
@@ -339,7 +351,9 @@ window.addEventListener('load', () => {
       }
       
       if (!gameExists) {
-        alert('Game not found.');
+        showPopup({
+          header: 'Game not found.'
+        });
         window.location.href = 'https://oskar-codes.github.io/uno-online';
         return;
       }
@@ -360,7 +374,9 @@ window.addEventListener('load', () => {
         const playerIndex = game.gameData.players.length;
 
         if (game.gameData.started) {
-          alert('Game has already started.');
+          showPopup({
+            header: 'Game has already started.'
+          });
           window.location.href = 'https://oskar-codes.github.io/uno-online';
           return;
         }
@@ -420,7 +436,9 @@ function handleGameUpdate(snap) {
     }
   }
   if (!isInGame) {
-    alert(`The host (${incomingGameData.players[0].name}) kicked you from the server.`);
+    showPopup({
+      header: `The host (${incomingGameData.players[0].name}) kicked you from the server.`
+    });
     window.location.href = 'https://oskar-codes.github.io/uno-online';
   }
 
@@ -431,7 +449,9 @@ function handleGameUpdate(snap) {
   }
   
   if (incomingGameData.winners.length > game.gameData.winners.length) {
-    alert(`${incomingGameData.winners[incomingGameData.winners.length - 1]} won the game!`);
+    showPopup({
+      header: `${incomingGameData.winners[incomingGameData.winners.length - 1]} won the game!`
+    });
     game.state = 'lobby';
 
   }
@@ -484,7 +504,9 @@ function checkEndOfGame() {
   if (game.client.cards.length === 0 && game.gameData.cardStack === 0) {
     
     // Win and reset game
-    alert('You won!');
+    showPopup({
+      header: 'You won!'
+    });
     game.state = 'lobby';
 
     game.gameData.winners.push(game.client.name);
@@ -520,6 +542,72 @@ function pickColor() {
       });
     }
 
+  });
+}
+
+function showPopup({ header, paragraph, type, placeholder }) {
+  return new Promise((resolve) => {
+
+    const closePopup = () => {
+      document.body.removeChild(div);
+      document.body.removeChild(background);
+    }
+
+    const div = document.createElement('div');
+    div.classList.add('popup');
+
+    const background = document.createElement('div');
+    background.classList.add('popup-background');
+
+    const h3 = document.createElement('h3');
+    h3.textContent = header;
+
+    const p = document.createElement('p');
+    if (paragraph) p.textContent = paragraph;
+
+    const buttons = document.createElement('div');
+
+    const input = document.createElement('input');
+    if (type === 'text') {
+      if (placeholder) input.setAttribute('placeholder', placeholder);
+
+      const cancel = document.createElement('button');
+      cancel.classList.add('red');
+      cancel.textContent = 'Cancel';
+
+      cancel.addEventListener('click', () => {
+        resolve(null);
+        closePopup();
+      });
+
+      const confirm = document.createElement('button');
+      confirm.classList.add('green');
+      confirm.textContent = 'Confirm';
+
+      confirm.addEventListener('click', () => {
+        resolve(input.value);
+        closePopup();
+      });
+
+      buttons.appendChild(cancel);
+      buttons.appendChild(confirm);
+    } else {
+      const close = document.createElement('button');
+      close.classList.add('yellow');
+      close.textContent = 'Close';
+
+      close.addEventListener('click', closePopup);
+
+      buttons.appendChild(close);
+    }
+
+    div.appendChild(h3);
+    if (paragraph) div.appendChild(p);
+    if (type === 'text') div.appendChild(input);
+    div.appendChild(buttons);
+
+    document.body.appendChild(background);
+    document.body.appendChild(div);
   });
 }
 

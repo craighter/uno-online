@@ -302,3 +302,50 @@ img {
   white-space: nowrap;
   transform: translate(-50%);
 }
+
+.popup {
+  position: fixed;
+  width: 50%;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: var(--base-2);
+  border-radius: 10px;
+  padding: 30px;
+}
+
+.popup h3 {
+  margin: 0;
+  margin-bottom: 18px;
+}
+
+.popup p {
+  font-size: 18px;
+  margin-top: 0;
+}
+
+.popup input {
+  width: 100%;
+  margin-bottom: 18px;
+  color: black;
+}
+
+.popup input:focus {
+  outline: none;
+}
+
+.popup > div {
+  text-align: center;
+}
+
+.popup > div button {
+  margin: 0 10px;
+}
+
+.popup-background {
+  content: '';
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #00000088;
+}
