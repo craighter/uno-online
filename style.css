@@ -101,12 +101,18 @@ header {
   border-radius: 5px;
 }
 
-.lobby button {
+.lobby > button {
   margin-top: 20px;
 }
 
 .lobby .players p {
   margin: 5px;
+}
+
+.lobby .players button {
+  font-size: 24px;
+  padding: 5px 15px;
+  margin-left: 20px;
 }
 
 img {

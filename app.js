@@ -291,6 +291,17 @@ const game = new Vue({
     log: function(...args) {
       console.log(...args);
       return false;
+    },
+    kick: function(index) {
+      if (this.host) {
+        this.gameData.players.splice(index, 1);
+        let i = 0;
+        for (const player of this.gameData.players) {
+          player.id = i;
+          i++;
+        }
+        updateGameOnServer();
+      }
     }
   },
   computed: {
@@ -399,10 +410,18 @@ function resetOwnCards() {
 function handleGameUpdate(snap) {
   const incomingGameData = snap.val();
 
+  isInGame = false;
   for (const player of incomingGameData.players) {
     if (!player.cards) {
       player.cards = [];
     }
+    if (player.name === game.client.name) {
+      isInGame = true;
+    }
+  }
+  if (!isInGame) {
+    alert(`The host (${incomingGameData.players[0].name}) kicked you from the server.`);
+    window.location.href = 'https://oskar-codes.github.io/uno-online';
   }
 
   if (!incomingGameData.winners) incomingGameData.winners = [];
