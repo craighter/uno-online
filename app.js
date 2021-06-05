@@ -52,7 +52,6 @@ const game = new Vue({
     gameId: '',
     gameData: {},
     host: false,
-    playerId: 0,
     isPickingColor: false,
     canSkip: false,
     unoDeclared: false
@@ -62,8 +61,6 @@ const game = new Vue({
 
       const ref = firebase.database().ref('games').push();
       const key = ref.key;
-      
-      const localName = localStorage.getItem("uno-online-name");
 
       const num = Math.floor(Math.random() * 9);
       const col = colors[Math.floor(Math.random() * 4)];
@@ -74,33 +71,49 @@ const game = new Vue({
         color: col
       }
 
-      this.gameData.players = [
-        {
-          name: localName && localName.trim() ? localName : 'Guest 1',
-          cards: stackReference.slice(0, nCards),
-          id: 0
-        }
-      ];
+      const localName = localStorage.getItem('uno-online-name');
+
+      const name = localName && localName.trim() ? localName : 'Guest 1';
       
       this.gameData.cardStack = 0;
       this.gameData.turn = 0;
       this.gameData.started = false;
       this.gameData.winners = [];
+      this.gameData.players = {};
       this.host = true;
       this.gameData.currentPlayer = 0;
       this.gameData.turnOrder = 1;
 
       ref.set(this.gameData).then(() => {
+
         this.gameId = key;
-        this.state = 'lobby';
         window.history.replaceState(null, null, `?game=${this.gameId}`);
+        
+        const playerRef = gameServerRef('players').push();
+        const playerKey = playerRef.key;
+        const playerObj = {
+          name: name,
+          cards: stackReference.slice(0, nCards)
+        }
+
+        playerRef.set(playerObj).then(() => {
+
+          this.gameData.players[playerKey] = playerObj;
+
+          this.playerKey = playerKey;
+
+          this.state = 'lobby';
+          gameServerRef().onDisconnect().remove();
+          ref.on('value', handleGameUpdate);
+        });
+
+
       });
 
-      ref.on('value', handleGameUpdate);
 
     },
     startGame: function() {
-      if (this.host && this.gameData.players.length > 1) {
+      if (this.host && Object.values(this.gameData.players).length > 1) {
         this.gameData.started = true;
         gameServerRef('started').set(true).then(() => {
           this.state = 'game';
@@ -122,7 +135,7 @@ const game = new Vue({
         return;
       }
       
-      for (const player of this.gameData.players) {
+      for (const player of Object.values(this.gameData.players)) {
         if (player.name === newName) {
           showPopup({
             header: 'Name already in use.'
@@ -179,7 +192,7 @@ const game = new Vue({
           this.gameData.currentCard = card;
           this.gameData.turnOrder *= -1;
           removeCard();
-          nextTurn(this.gameData.players.length === 2 ? 0 : 1);
+          nextTurn(Object.values(this.gameData.players).length === 2 ? 0 : 1);
           return;
         }
   
@@ -255,7 +268,7 @@ const game = new Vue({
           this.gameData.turnOrder *= -1;
 
           removeCard();
-          nextTurn(this.gameData.players.length === 2 ? 0 : 1);
+          nextTurn(Object.values(this.gameData.players).length === 2 ? 0 : 1);
           return;
         }
       }
@@ -304,21 +317,17 @@ const game = new Vue({
       console.log(...args);
       return false;
     },
-    kick: function(index) {
+    kick: function(id) {
       if (this.host) {
-        this.gameData.players.splice(index, 1);
-        let i = 0;
-        for (const player of this.gameData.players) {
-          player.id = i;
-          i++;
-        }
+        delete this.gameData.players[id];
         updateGameOnServer();
       }
     }
   },
   computed: {
     otherPlayers: function() {
-      return [...this.gameData.players.slice(this.playerId + 1), ...this.gameData.players.slice(0, this.playerId)];
+      const players = Object.values(this.gameData.players);
+      return [...players.slice(this.playerId + 1), ...players.slice(0, this.playerId)];
     },
     playerCardsJustification: function() {
       const width = window.innerWidth;
@@ -327,7 +336,11 @@ const game = new Vue({
       return 'center';
     },
     client: function() {
-      return this.gameData.players[this.playerId];
+      return this.gameData.players[this.playerKey];
+    },
+    playerId: function() {
+      const index = Object.keys(this.gameData.players).findIndex(e => e === this.playerKey);
+      return index;
     }
   },
   watch: {
@@ -364,7 +377,7 @@ window.addEventListener('load', () => {
 
         const incomingGameData = snap.val();
 
-        for (const player of incomingGameData.players) {
+        for (const player of Object.values(incomingGameData.players)) {
           if (!player.cards) {
             player.cards = [];
           }
@@ -372,8 +385,7 @@ window.addEventListener('load', () => {
         if (!incomingGameData.winners) incomingGameData.winners = [];
 
         game.gameData = incomingGameData;
-        const playerIndex = game.gameData.players.length;
-
+        
         if (game.gameData.started) {
           showPopup({
             header: 'Game has already started.'
@@ -383,11 +395,12 @@ window.addEventListener('load', () => {
           return;
         }
         
+        const playerIndex = Object.values(game.gameData.players).length;
         const localName = localStorage.getItem("uno-online-name");
         let name = `Guest ${playerIndex + 1}`;
         if (localName && localName.trim()) {
           let nameAvailable = true;
-          for (const player of game.gameData.players) {
+          for (const player of Object.values(game.gameData.players)) {
             if (player.name === localName) {
               nameAvailable = false;
               break;
@@ -396,17 +409,20 @@ window.addEventListener('load', () => {
           if (nameAvailable) name = localName;
         }
         game.state = 'lobby';
-        game.playerId = playerIndex;
         const playerObj = {
           name: name,
           cards: stackReference.slice(0, nCards),
-          id: playerIndex
         }
 
-        game.gameData.players.push(playerObj);
+        const playerRef = gameServerRef('players').push();
+        const playerKey = playerRef.key;
+        
+        game.playerKey = playerKey;
+        game.gameData.players[playerKey] = playerObj;
 
         updateSelfOnServer().then(() => {
           gameServerRef().on('value', handleGameUpdate);
+          gameServerRef(`players/${playerKey}`).onDisconnect().remove();
         });
       });
     });
@@ -428,24 +444,37 @@ function resetOwnCards() {
 function handleGameUpdate(snap) {
   const incomingGameData = snap.val();
 
-  isInGame = false;
-  for (const player of incomingGameData.players) {
+  if (!incomingGameData.winners) incomingGameData.winners = [];
+
+  let isInLobby = false;
+  
+  for (const key of Object.keys(incomingGameData.players)) {
+    const player = incomingGameData.players[key];
     if (!player.cards) {
       player.cards = [];
     }
-    if (player.name === game.client.name) {
-      isInGame = true;
+    if (key === game.playerKey) {
+      isInLobby = true;
     }
   }
-  if (!isInGame) {
+
+  if (!isInLobby) {
     showPopup({
-      header: `The host (${incomingGameData.players[0].name}) kicked you from the server.`
+      header: `The host (${Object.values(incomingGameData.players)[0].name}) kicked you from the server.`
     }).then(() => {
       window.location.href = 'https://oskar-codes.github.io/uno-online';
     });
   }
 
-  if (!incomingGameData.winners) incomingGameData.winners = [];
+  if (!incomingGameData) {
+    showPopup({
+      header: `The host (${Object.values(game.gameData.players)[0].name}) left the game.`,
+      paragraph: 'Shutting down the server.'
+    }).then(() => {
+      window.location.href = 'https://oskar-codes.github.io/uno-online';
+    });
+    return;
+  }
 
   if (incomingGameData.started && game.state !== 'game') {
     game.state = 'game';
@@ -457,7 +486,19 @@ function handleGameUpdate(snap) {
     }).then(() => {
       game.state = 'lobby';
     });
+  }
 
+  if (Object.values(incomingGameData.players).length !== Object.values(game.gameData.players).length && game.state == 'game') {
+    showPopup({
+      header: `A player left the game.`,
+      paragraph: 'Game is going back to the lobby.'
+    });
+    game.state = 'lobby';
+    if (game.host) {
+      game.gameData = incomingGameData;
+      resetGameData();
+    }
+    return;
   }
   
   game.gameData = incomingGameData;
@@ -471,7 +512,7 @@ function handleGameUpdate(snap) {
 }
 
 function updateSelfOnServer() {
-  return gameServerRef(`players/${game.playerId}`).set(game.client);
+  return gameServerRef(`players/${game.playerKey}`).set(game.client);
 }
 
 function updateGameOnServer() {
@@ -491,7 +532,7 @@ function nextTurn(n = 1, addedCards) {
 
   n *= game.gameData.turnOrder;
 
-  const nPlayers = game.gameData.players.length;
+  const nPlayers = Object.values(game.gameData.players).length;
   const dist = game.playerId + n;
   if (dist < 0) {
     game.gameData.currentPlayer = nPlayers + dist;
@@ -511,26 +552,31 @@ function checkEndOfGame() {
     showPopup({
       header: 'You won!'
     });
-    game.state = 'lobby';
-
     game.gameData.winners.push(game.client.name);
-    game.gameData.cardStack = 0;
-    game.gameData.turn = 0;
-    game.gameData.started = false;
-    game.gameData.currentPlayer = 0;
-    game.gameData.turnOrder = 1;
 
-    const num = Math.floor(Math.random() * 9);
-    const col = colors[Math.floor(Math.random() * 4)];
-    game.gameData.currentCard = {
-      name: `${col}${num}`,
-      number: num,
-      color: col
-    }
-    
-    updateGameOnServer();
+    resetGameData();
 
   }
+}
+
+function resetGameData() {
+  game.state = 'lobby';
+
+  game.gameData.cardStack = 0;
+  game.gameData.turn = 0;
+  game.gameData.started = false;
+  game.gameData.currentPlayer = 0;
+  game.gameData.turnOrder = 1;
+
+  const num = Math.floor(Math.random() * 9);
+  const col = colors[Math.floor(Math.random() * 4)];
+  game.gameData.currentCard = {
+    name: `${col}${num}`,
+    number: num,
+    color: col
+  }
+
+  updateGameOnServer();
 }
 
 function pickColor() {
