@@ -137,7 +137,7 @@ img {
   height: calc(125px * 1.5);
 }
 
-.player-cards.active img:hover {
+.not-touch .player-cards.active img:hover {
   width: 150px;
   height: calc(150px * 1.5);
 }
@@ -147,7 +147,7 @@ img {
   height: calc(100px * 1.5);
 }
 
-.player-cards img.img-eligible-for-skip:hover {
+.not-touch .player-cards img.img-eligible-for-skip:hover {
   width: 125px;
   height: calc(125px * 1.5);
 }

@@ -1,3 +1,10 @@
+const TOUCH = 'ontouchstart' in document;
+if (TOUCH) {
+  document.body.classList.add('touch');
+} else {
+  document.body.classList.add('not-touch');
+}
+
 const stackReference = [];
 for (let i = 0; i < 4; i++) {
   stackReference.push({
