@@ -105,6 +105,7 @@ const game = new Vue({
           this.state = 'lobby';
           gameServerRef().onDisconnect().remove();
           ref.on('value', handleGameUpdate);
+          gameServerRef('log').on('child_added', handleLogMessage);
         });
 
 
@@ -157,6 +158,7 @@ const game = new Vue({
           showPopup({
             header: 'You forgot to declare UNO!'
           });
+          log(`${this.client.name} forgot to declare UNO!`);
         }
         this.unoDeclared = false;
       }
@@ -164,6 +166,9 @@ const game = new Vue({
       //Same card, skip turn
       if ((currentCard.color === card.color && currentCard.number === card.number && currentCard.name === card.name && this.gameData.currentPlayer !== this.playerId) || (currentCard.name.includes('+4') && card.name.includes('+4') || (currentCard.name.includes('+col') && card.name.includes('+col')))) {
         this.gameData.currentCard = card;
+
+        log(`${this.client.name} skipped ${Object.values(this.gameData.players)[this.gameData.currentPlayer].name}'s turn!`);
+
         this.gameData.turnSkip = true;
         if (card.number !== -1) {
           this.gameData.currentCard = card;
@@ -422,6 +427,7 @@ window.addEventListener('load', () => {
 
         updateSelfOnServer().then(() => {
           gameServerRef().on('value', handleGameUpdate);
+          gameServerRef('log').on('child_added', handleLogMessage);
           gameServerRef(`players/${playerKey}`).onDisconnect().remove();
         });
       });
@@ -662,6 +668,28 @@ function showPopup({ header, paragraph, type, placeholder }) {
     document.body.appendChild(background);
     document.body.appendChild(div);
   });
+}
+
+function log(message) {
+  gameServerRef('log').push().set(message);
+}
+
+function handleLogMessage(snap) {
+  if (!snap.val()) return;
+
+  const container = document.querySelector('.log');
+  const msg = document.createElement('div');
+
+  const message = snap.val().replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+  msg.textContent = message;
+  msg.classList.add('log-message');
+
+  container.appendChild(msg);
+
+  window.setTimeout(() => {
+    container.removeChild(msg);
+  }, 3e3);
 }
 
 function getAllUrlParams(url) {

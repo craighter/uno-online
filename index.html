@@ -54,6 +54,8 @@
           <button class="green" :class="{ active: unoDeclared }" :disabled="gameData.players[playerKey].cards.length !== 2" @click="declareUno">UNO!</button>
         </div>
 
+        <div class="log"></div>
+
         <div class="color-picker" v-show="isPickingColor">
           <button class="red">Red</button>
           <button class="blue">Blue</button>
@@ -74,15 +76,12 @@
               <img v-for="card in otherPlayer.cards" src="cards/back.png">
               <p>{{otherPlayer.name}} ({{otherPlayer.cards.length}})</p>
             </div>
-  
-            
+
           </div>
 
           <div class="turn-order" :style="`transform: rotateZ(${gameData.turnOrder === 1 ? 0 : 180}deg); --current-color: ${gameData.currentCard.color.replace('green', 'lime')}`">➜</div>
 
         </div>
-
-        
 
       </div>
 
