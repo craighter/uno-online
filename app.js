@@ -100,7 +100,7 @@ const game = new Vue({
         const playerKey = playerRef.key;
         const playerObj = {
           name: name,
-          cards: [this.gameData.currentCard] // stackReference.slice(0, nCards)
+          cards: stackReference.slice(0, nCards)
         }
 
         playerRef.set(playerObj).then(() => {
@@ -450,7 +450,7 @@ function gameServerRef(query) {
 
 function resetOwnCards() {
   shuffle(stackReference);
-  game.client.cards = [game.gameData.currentCard]; //stackReference.slice(0, nCards);
+  game.client.cards = stackReference.slice(0, nCards);
   updateSelfOnServer();
 }
 
