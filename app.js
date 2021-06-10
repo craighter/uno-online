@@ -100,7 +100,7 @@ const game = new Vue({
         const playerKey = playerRef.key;
         const playerObj = {
           name: name,
-          cards: stackReference.slice(0, nCards)
+          cards: [this.gameData.currentCard] // stackReference.slice(0, nCards)
         }
 
         playerRef.set(playerObj).then(() => {
@@ -450,7 +450,7 @@ function gameServerRef(query) {
 
 function resetOwnCards() {
   shuffle(stackReference);
-  game.client.cards = stackReference.slice(0, nCards);
+  game.client.cards = [game.gameData.currentCard]; //stackReference.slice(0, nCards);
   updateSelfOnServer();
 }
 
@@ -558,8 +558,10 @@ function nextTurn(n = 1, addedCards) {
   })
 }
 
+window.setInterval(checkEndOfGame, 3e3);
+
 function checkEndOfGame() {
-  if (game.client.cards.length === 0 && game.gameData.cardStack === 0) {
+  if (game.state === 'game' && game.client.cards.length <= 0 && game.gameData.cardStack === 0) {
     
     // Win and reset game
     showPopup({
