@@ -100,7 +100,7 @@ const game = new Vue({
         const playerKey = playerRef.key;
         const playerObj = {
           name: name,
-          cards: [this.gameData.currentCard] // stackReference.slice(0, nCards)
+          cards: stackReference.slice(0, nCards)
         }
 
         playerRef.set(playerObj).then(() => {
@@ -171,7 +171,7 @@ const game = new Vue({
       }
       const currentCard = this.gameData.currentCard;
       //Same card, skip turn
-      if ((currentCard.color === card.color && currentCard.number === card.number && currentCard.name === card.name && this.gameData.currentPlayer !== this.playerId) || (currentCard.name.includes('+4') && card.name.includes('+4') || (currentCard.name.includes('+col') && card.name.includes('+col')))) {
+      if (this.cardCanSkip(card)) {
         this.gameData.currentCard = card;
 
         log(`${this.client.name} skipped ${Object.values(this.gameData.players)[this.gameData.currentPlayer].name}'s turn!`);
@@ -334,6 +334,16 @@ const game = new Vue({
         delete this.gameData.players[id];
         updateGameOnServer();
       }
+    },
+    cardCanSkip: function(card) {
+      return (this.gameData.currentCard.color === card.color
+           && this.gameData.currentCard.number === card.number
+           && this.gameData.currentCard.name === card.name
+           && this.gameData.currentPlayer !== this.playerId )
+         || ((this.gameData.currentCard.name.includes('+4')
+           && card.name.includes('+4'))
+         || (this.gameData.currentCard.name.includes('+col')
+           && card.name.includes('+col')))
     }
   },
   computed: {
@@ -450,7 +460,7 @@ function gameServerRef(query) {
 
 function resetOwnCards() {
   shuffle(stackReference);
-  game.client.cards = [game.gameData.currentCard]; //stackReference.slice(0, nCards);
+  game.client.cards = stackReference.slice(0, nCards);
   updateSelfOnServer();
 }
 

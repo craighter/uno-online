@@ -29,6 +29,16 @@
         <p>Lobby ID: {{gameId}}</p>
         <p>Send this page to your friends for them to join.</p>
 
+        <div class="game-settings">
+          <h1>Game settings</h1>
+          <ul>
+            <li>
+              <input type="checkbox" name="turn-skipping" :disabled="!host">
+              <label for="turn-skipping">Turn skipping</label>
+            </li>
+          </ul>
+        </div>
+
         <div class="players">
           <h1>Players:</h1>
           <p v-for="(player, key) in gameData.players" :class="{ rainbow: key === playerKey }">{{player.name}} <button @click="kick(key)" v-if="host && key !== playerKey" class="red">✕</button></p>
@@ -64,7 +74,7 @@
         </div>
 
         <div class="player-cards" :style="`justify-content: ${playerCardsJustification};`" :class="{ active: gameData.currentPlayer === playerId }">
-          <img :class="{ 'img-eligible-for-skip': (gameData.currentCard.color === card.color && gameData.currentCard.number === card.number && gameData.currentCard.name === card.name && gameData.currentPlayer !== playerId ) || ((gameData.currentCard.name.includes('+4') && card.name.includes('+4')) || (gameData.currentCard.name.includes('+col') && card.name.includes('+col')))  }" v-for="(card, index) in gameData.players[playerKey].cards" :data-index="index" @click="playCard(index)" :src="`cards/${card.name}.png`">
+          <img :class="{ 'img-eligible-for-skip': cardCanSkip(card)  }" v-for="(card, index) in gameData.players[playerKey].cards" :data-index="index" @click="playCard(index)" :src="`cards/${card.name}.png`">
           <button class="yellow" v-show="canSkip" @click="skipTurn">Skip</button>
         </div>
 
