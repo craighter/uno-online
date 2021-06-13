@@ -31,12 +31,10 @@
 
         <div class="game-settings">
           <h1>Game settings</h1>
-          <ul>
-            <li>
-              <input type="checkbox" name="turn-skipping" :disabled="!host">
-              <label for="turn-skipping">Turn skipping</label>
-            </li>
-          </ul>
+          <p v-for="(setting, key) in gameData.settings" :class="{ rainbow: setting.enabled }">
+            <input :checked="setting.enabled" type="checkbox" :name="key" :disabled="!host" @click="toggleSetting(setting);">
+            <label :for="key">{{setting.name}}</label>
+          </p>
         </div>
 
         <div class="players">

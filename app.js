@@ -90,6 +90,12 @@ const game = new Vue({
       this.host = true;
       this.gameData.currentPlayer = 0;
       this.gameData.turnOrder = 1;
+      this.gameData.settings = {
+        turnSkipping: {
+          enabled: true,
+          name: 'Turn Skipping'
+        }
+      }
 
       ref.set(this.gameData).then(() => {
 
@@ -336,14 +342,19 @@ const game = new Vue({
       }
     },
     cardCanSkip: function(card) {
-      return (this.gameData.currentCard.color === card.color
+      return ((this.gameData.currentCard.color === card.color
            && this.gameData.currentCard.number === card.number
            && this.gameData.currentCard.name === card.name
            && this.gameData.currentPlayer !== this.playerId )
          || ((this.gameData.currentCard.name.includes('+4')
            && card.name.includes('+4'))
          || (this.gameData.currentCard.name.includes('+col')
-           && card.name.includes('+col')))
+           && card.name.includes('+col'))))
+           && this.gameData.settings.turnSkipping.enabled;
+    },
+    toggleSetting: function(setting) {
+      setting.enabled = !setting.enabled;
+      updateGameOnServer();
     }
   },
   computed: {

@@ -11,9 +11,19 @@
 * {
   box-sizing: border-box;
   font-family: lineto-circular;
-  color: white;
-  font-size: 32px;
   user-select: none;
+}
+
+h1, h3, p, header, span {
+  color: white;
+}
+
+h1 {
+  font-size: 38px;
+}
+
+p, h3 {
+  font-size: 32px;
 }
 
 ::-webkit-scrollbar {
@@ -94,10 +104,11 @@ header {
   text-align: center;
 }
 
-.lobby .players {
+.lobby .players, .lobby .game-settings {
   padding: 20px;
   background-color: var(--base-2);
   border-radius: 5px;
+  margin: 20px 0;
 }
 
 .lobby > button {
@@ -218,6 +229,7 @@ img {
   animation: show-log-message 3s linear;
   border-radius: 5px;
   padding: 5px 10px;
+  color: white;
 }
 
 @keyframes show-log-message {
@@ -347,10 +359,17 @@ img {
 .popup h3 {
   margin: 0;
   margin-bottom: 18px;
+  text-align: center;
 }
 
-.popup p {
-  font-size: 18px;
+.popup input {
+  border-radius: 5px;
+  border: none;
+  padding: 5px;
+}
+
+.popup p, .popup input {
+  font-size: 24px;
   margin-top: 0;
 }
 
